@@ -3,8 +3,7 @@ const bcryptjs = require('bcryptjs');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
-
-exports.createUser = async (req, res) => {
+exports.authenticateUser = async (req, res) => {
 
     // Check if there were any errors
     const errors = validationResult(req);
@@ -12,27 +11,23 @@ exports.createUser = async (req, res) => {
         return res.status(400).json( { errors: errors.array() } );
     }
 
-    // Extract email and password
+    // Extract email and password from email and password
     const { email, password } = req.body;
 
     try {
-        // Check if user is unique
-        let user = await User.findOne( {email} );
-
-        if(user) {
-            return res.status(400).json( { msg: 'The user already exists' } );
+        // Check if the user is registered
+        let user = await User.findOne( { email });
+        if(!user) {
+            return res.status(400).json({ msg: "The email is not registered "});
         }
 
-        // Create a new user
-        user = new User(req.body);
+        // Check password
+        const correctPass = await bcryptjs.compare(password, user.password);
+        if(!correctPass) {
+            return res.status(400).json({ msg: "Incorrect password "});
+        }
 
-        // Hashing password
-        const salt = await bcryptjs.genSalt(10);
-        user.password = await bcryptjs.hash(password, salt);
-        
-        // Save user in db
-        await user.save();
-
+        // If everything is correct
         // Create and sign the JWT
         const payload = {
             user: {
@@ -49,10 +44,12 @@ exports.createUser = async (req, res) => {
             // Confirmation messagge
             res.json( { token } );
         });
-        
+
         
     } catch (error) {
         console.log(error);
         res.status(400).json( { msg: 'There was an error' } );
+
     }
+
 }
