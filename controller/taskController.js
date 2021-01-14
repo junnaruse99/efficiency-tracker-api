@@ -44,7 +44,7 @@ exports.createTask = async (req, res) => {
 exports.getTasks = async (req, res) => {
     try {
         // Extract project id
-        const { projectId } = req.body;
+        const { projectId } = req.query;
 
         const project = await Project.findById(projectId);
         if(!project) {
@@ -53,7 +53,7 @@ exports.getTasks = async (req, res) => {
 
         // Check if the project belongs to the user
         if(project.userId.toString() !== req.user.id) {
-            return res.status(401).json({ msg: "Not authorized" });
+            return res.status(401).json({ msg: "Not authorized" }).sort({ created: -1 });
         }
 
         // Get tasks if projects by projectId
@@ -111,7 +111,7 @@ exports.deleteTask = async (req, res) => {
     try {
 
         // Extract project id
-        const { projectId } = req.body;
+        const { projectId } = req.query;
 
         // Check if the task exists
         let task = await Task.findById(req.params.id);
