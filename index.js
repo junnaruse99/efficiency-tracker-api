@@ -1,7 +1,7 @@
 // import not supported
 const express = require('express');
 const connectDB = require('./config/db');
-require('dotenv').config({ path: 'variables.env' });
+require('dotenv').config({ path: '.env' });
 const cors = require('cors');
 
 // Creating server
