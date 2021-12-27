@@ -7,6 +7,8 @@ exports.createProject = async (req, res) => {
     // Check if there was any errors
     const errors = validationResult(req);
     if( !errors.isEmpty() ) {
+        console.log("POST /api/projects 400");
+        console.log(errors.array());
         return res.status(400).json( { errors: errors.array() } );
     }
     
@@ -21,7 +23,10 @@ exports.createProject = async (req, res) => {
         await project.save();
         res.json( project );
 
+        console.log("POST /api/projects 201");
+
     } catch (error) {
+        console.log("POST /api/projects 500");
         console.log(error);
         res.status(500).send('There was an error');
     }
@@ -32,8 +37,11 @@ exports.getProject = async (req, res) => {
     try {
         const projects = await Project.find( { userId: req.user.id } ).sort({ created: -1 });
         res.json({ projects });
+        console.log("GET /api/projects 200");
+
 
     } catch (error) {
+        console.log("GET /api/projects 500");
         console.log(error);
         res.status(500).send('There was an error');
     }
@@ -44,6 +52,8 @@ exports.updateProject = async ( req, res ) => {
     // Check if there was any errors
     const errors = validationResult(req);
     if( !errors.isEmpty() ) {
+        console.log("PUT /api/projects 400");
+        console.log(errors.array());
         return res.status(400).json( { errors: errors.array() } );
     }
 
@@ -62,19 +72,26 @@ exports.updateProject = async ( req, res ) => {
 
         // Check if project exists
         if(!project) {
+            console.log("PUT /api/projects 404");
+            console.log("Project not found");
             return res.status(404).json( { msg: 'Project not found' } );
         }
 
         // Verify the userID
         if(project.userId.toString() !== req.user.id) {
+            console.log("PUT /api/projects 401");
+            console.log("Not authorized")
             return res.status(401).json({ msg: "Not authorized" });
         }
 
         // Update
         project = await Project.findByIdAndUpdate({ _id: req.params.id }, { $set : newProject }, { new: true } );
         res.json( { project } );
+        console.log("PUT /api/projects 200");
+
 
     } catch (error) {
+        console.log("PUT /api/projects 500");
         console.log(error);
         res.status(500).send('There was an error');
     }
@@ -89,20 +106,27 @@ exports.deleteProject = async ( req, res ) => {
 
         // Check if project exists
         if(!project) {
+            console.log("DEL /api/projects 404");
+            console.log("Project not found");
             return res.status(404).json( { msg: 'Project not found' } );
         }
 
         // Verify the userID
         if(project.userId.toString() !== req.user.id) {
+            console.log("DEL /api/projects 401");
+            console.log("Not authorized");
             return res.status(401).json({ msg: "Not authorized" });
         }
 
         // Delete project by id
         await Project.findOneAndRemove({ _id : req.params.id });
         res.json({ msg: "The project was deleted" });
+        console.log("DEL /api/projects 200");
+
         
     }
     catch (error) {
+        console.log("DEL /api/projects 500");
         console.log(error);
         res.status(500).send('There was an error');
     }

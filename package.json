@@ -10,7 +10,7 @@
   "author": "Jun Naruse",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.15"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
